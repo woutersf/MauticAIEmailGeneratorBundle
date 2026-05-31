@@ -1,0 +1,140 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}ai_email_generator{% endblock %}
+
+{% block headerTitle %}<i class="ri-sparkling-line"></i> Generate Email with AI{% endblock %}
+
+{% block content %}
+<div class="pa-md">
+
+    {% if error %}
+        <div class="alert alert-danger">
+            <i class="ri-error-warning-line"></i> {{ error }}
+        </div>
+    {% endif %}
+
+    {% if models is empty %}
+        <div class="alert alert-warning">
+            <i class="ri-settings-3-line"></i>
+            <strong>AI Connection not configured.</strong>
+            Please configure the <a href="{{ path('mautic_plugin_index') }}">AI Connection integration</a> first.
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-body pa-lg">
+
+                    <form method="post" action="{{ path('mautic_ai_email_generator_generate') }}" id="ai-email-generator-form">
+
+                        <div class="form-group">
+                            <label for="ai_model" class="control-label">
+                                <i class="ri-cpu-line"></i> AI Model
+                            </label>
+                            <select name="model" id="ai_model" class="form-control">
+                                {% for displayName, modelId in models %}
+                                    <option value="{{ modelId }}" {% if modelId == selectedModel %}selected{% endif %}>
+                                        {{ displayName }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ai_prompt" class="control-label">
+                                <i class="ri-edit-line"></i> Describe your email
+                            </label>
+
+                            <div class="well well-sm mb-sm" style="background: #f8f9fa; border-color: #e9ecef;">
+                                <small class="text-muted">
+                                    <strong>For best results, include:</strong>
+                                    the email's purpose &nbsp;·&nbsp;
+                                    your target audience &nbsp;·&nbsp;
+                                    key message or offer &nbsp;·&nbsp;
+                                    desired tone (formal / friendly / promotional) &nbsp;·&nbsp;
+                                    any call-to-action
+                                </small>
+                            </div>
+
+                            <textarea
+                                name="prompt"
+                                id="ai_prompt"
+                                class="form-control"
+                                rows="7"
+                                placeholder="e.g. A welcome email for new newsletter subscribers of our SaaS product. Friendly tone. Highlight 3 key features: dashboard analytics, automated reports, and team collaboration. CTA to log in and explore."
+                                style="resize: vertical;"
+                            >{{ prompt }}</textarea>
+
+                            <div class="mt-sm">
+                                <small class="text-muted mr-xs">Quick starts:</small>
+                                <span class="label label-default js-suggestion" style="cursor:pointer; margin-right:4px;">Welcome new subscribers</span>
+                                <span class="label label-default js-suggestion" style="cursor:pointer; margin-right:4px;">Product launch announcement</span>
+                                <span class="label label-default js-suggestion" style="cursor:pointer; margin-right:4px;">Monthly newsletter</span>
+                                <span class="label label-default js-suggestion" style="cursor:pointer; margin-right:4px;">Promotional offer</span>
+                                <span class="label label-default js-suggestion" style="cursor:pointer;">Re-engagement campaign</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" id="ai-generate-btn" {% if models is empty %}disabled{% endif %}>
+                                <i class="ri-sparkling-line"></i>
+                                Generate Email
+                            </button>
+                            <a href="{{ path('mautic_email_index') }}" class="btn btn-default btn-lg ml-sm">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <p class="text-muted text-center small">
+                <i class="ri-information-line"></i>
+                The generated email will be saved as an unpublished draft. You can review and edit it in the standard email editor before publishing.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<div id="ai-loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+    <div style="text-align:center;">
+        <i class="ri-sparkling-line" style="font-size:3rem; color:#4e5d6c; animation: pulse 1.5s ease-in-out infinite;"></i>
+        <p style="margin-top:16px; font-size:1.1rem; color:#4e5d6c; font-weight:500;">Generating your email…</p>
+        <p class="text-muted small">This usually takes 10–30 seconds</p>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+</style>
+
+<script>
+(function () {
+    var suggestions = document.querySelectorAll('.js-suggestion');
+    var textarea = document.getElementById('ai_prompt');
+    suggestions.forEach(function (el) {
+        el.addEventListener('click', function () {
+            textarea.value = this.textContent.trim();
+            textarea.focus();
+        });
+    });
+
+    var form = document.getElementById('ai-email-generator-form');
+    var overlay = document.getElementById('ai-loading-overlay');
+    var btn = document.getElementById('ai-generate-btn');
+    form.addEventListener('submit', function () {
+        if (textarea.value.trim() !== '') {
+            overlay.style.display = 'flex';
+            btn.disabled = true;
+        }
+    });
+}());
+</script>
+{% endblock %}
