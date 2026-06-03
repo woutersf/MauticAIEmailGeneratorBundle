@@ -1,36 +1,41 @@
-# MauticAIEmailGeneratorBundle
+# MauticAIEmailGeneratorBundle - AI Email Generator Plugin for Mautic 7
 
-A Mautic plugin that generates complete HTML email drafts from a plain-text description using any AI model configured through [MauticAIconnectionBundle](https://github.com/dropsolid).
+**MauticAIEmailGeneratorBundle** is a Mautic 7 plugin that generates complete, inline-styled HTML email drafts from a plain-text description using any LiteLLM-compatible AI model.
 
 Built by [Frederik Wouters](https://frederikwouters.be/) at [Dropsolid](http://dropsolid.com/).
 
 ---
 
-## What it does
+## Features
 
-The plugin adds a **Generate with AI** entry to the email list's "New" dropdown. Clicking it opens a form where you describe the email you want. On submit, the plugin calls the configured LiteLLM-compatible model, generates a fully inline-styled HTML email, and saves it as an unpublished draft. Mautic then redirects you directly to the standard email editor so you can review and publish it.
+- Generate Mautic email drafts with AI from a single text description
+- Select any AI model configured in [MauticAIconnectionBundle](https://github.com/dropsolid) (Claude, GPT-4, Mistral, and others via LiteLLM)
+- Saves the result as an unpublished Mautic email draft, ready to review and edit
+- Redirects directly to the Mautic email editor after generation
+- Quick-start prompts for common email types: welcome, product launch, newsletter, promotional, re-engagement
+- No API keys required in this bundle -- model credentials are managed by MauticAIconnectionBundle
 
 ---
 
 ## Screenshots
 
-### 1. Entry point in the email list
+### Entry point: "Generate with AI" in the Mautic email list
 
-![Generate with AI button in the Mautic email list toolbar](docs/screenshot-1-button.png)
+![Mautic email list toolbar showing the Generate with AI option in the New email dropdown](docs/screenshot-1-button.png)
 
-### 2. Generation form
+### AI email generation form
 
-![AI email generation form with model selector, description field, and quick-start prompts](docs/screenshot-2-form.png)
+![Mautic AI email generation form with LiteLLM model selector, description textarea, quick-start prompt buttons, and Generate Email action](docs/screenshot-2-form.png)
 
-### 3. Generated draft in the Mautic email editor
+### Generated email opened in the Mautic email editor
 
-![AI-generated email opened directly in the Mautic drag-and-drop editor](docs/screenshot-3-result.png)
+![AI-generated HTML email opened as an unpublished draft in the Mautic drag-and-drop email editor](docs/screenshot-3-result.png)
 
 ---
 
 ## Requirements
 
-- Mautic 5.x
+- Mautic 7.x
 - [MauticAIconnectionBundle](https://github.com/dropsolid) installed and configured with at least one LiteLLM-compatible model
 - PHP 8.1+
 
@@ -40,32 +45,38 @@ The plugin adds a **Generate with AI** entry to the email list's "New" dropdown.
 
 1. Place the bundle in `<mautic-root>/plugins/MauticAIEmailGeneratorBundle`.
 2. Clear the Mautic cache: `bin/console cache:clear`.
-3. Run the plugin install command: `bin/console mautic:plugins:reload`.
+3. Reload plugins: `bin/console mautic:plugins:reload`.
 4. Enable the plugin under **Settings > Plugins > AI Email Generator**.
 
 ---
 
 ## Usage
 
-1. Go to **Emails** in the Mautic menu.
+1. Go to **Emails** in the Mautic navigation.
 2. Click the **New** dropdown and select **Generate with AI**.
-3. Pick an AI model from the dropdown (populated from MauticAIconnectionBundle).
-4. Enter a description of the email. The more context you provide (purpose, audience, tone, call-to-action), the better the output.
-5. Use one of the quick-start buttons to pre-fill a common scenario.
-6. Click **Generate Email**. The plugin saves an unpublished draft and opens it in the email editor.
+3. Select an AI model from the dropdown.
+4. Describe the email (purpose, audience, tone, call-to-action).
+5. Optionally click a quick-start button to pre-fill a scenario.
+6. Click **Generate Email**. An unpublished draft is created and opened in the editor.
 
 ---
 
 ## How it works
 
-| Component | Description |
+| Component | Role |
 |---|---|
-| `ButtonSubscriber` | Injects the "Generate with AI" button into the email list toolbar via Mautic's button event system |
-| `GeneratorController` | Handles the generation form and POST request |
-| `EmailGeneratorService` | Calls `LiteLLMService`, parses the HTML response, extracts the subject from the `<title>` tag, and persists an unpublished `Email` entity |
-| `AiEmailGeneratorIntegration` | Registers the plugin with Mautic's integration framework (no credentials required) |
+| `ButtonSubscriber` | Injects the "Generate with AI" button into the Mautic email list toolbar via the button event system |
+| `GeneratorController` | Renders the generation form and handles the POST |
+| `EmailGeneratorService` | Calls `LiteLLMService`, parses the HTML response, extracts the email subject from the `<title>` tag, and saves an unpublished `Email` entity |
+| `AiEmailGeneratorIntegration` | Registers the plugin with Mautic's integration framework |
 
-The service sends a strict system prompt instructing the model to return only raw HTML with inline CSS, a 600 px centered layout, and no placeholder text.
+The service sends a system prompt that enforces raw HTML output, inline CSS only, a 600 px centered responsive layout, and no placeholder text.
+
+---
+
+## Related
+
+- [MauticAIconnectionBundle](https://github.com/dropsolid) - LiteLLM connection layer that provides the AI models used by this plugin
 
 ---
 
